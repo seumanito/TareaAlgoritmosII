@@ -1,0 +1,3 @@
+ # Pasos de creacion 
+ # Ya creado el repositorio y la API Key creo el archivo estructuras.py que tenga la Clase Nodo para trabajar la listas y colas, ademas cada fichero necesita saber quien es su padre para realizar el cd ... La Clase ColaHijos para que al crear un archivo se almacene al final de la lista. La Clase PilaLogs Para registrar las operaciones como indica el PDF 
+ # Luego se crea el fichero sistema.py Importando lo de estructuras.py donde la clase SistemaArchivos donde se crea la Raiz C:, se inicializa la cola de hijos de la raiz, donde se encuentran los punteros y se realizan los comandos.
