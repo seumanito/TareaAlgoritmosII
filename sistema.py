@@ -77,9 +77,9 @@ class SistemaArchivos:
             "hijos": []
         }
 
-
-        if nodo.es_carpeta:
-            temp = nodo.hijos_cabeza 
+        if nodo.es_carpeta and hasattr(nodo, 'lista_hijos'):
+            temp = nodo.lista_hijos.cabeza 
+            
             while temp:
                 diccionario["hijos"].append(self._nodo_a_dict(temp))
                 temp = temp.siguiente

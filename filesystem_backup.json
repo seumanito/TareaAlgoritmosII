@@ -2,5 +2,19 @@
     "nombre": "C:",
     "es_carpeta": true,
     "contenido": "",
-    "hijos": []
+    "hijos": [
+        {
+            "nombre": "universidad",
+            "es_carpeta": true,
+            "contenido": "",
+            "hijos": [
+                {
+                    "nombre": "Hola.txt",
+                    "es_carpeta": false,
+                    "contenido": "",
+                    "hijos": []
+                }
+            ]
+        }
+    ]
 }
