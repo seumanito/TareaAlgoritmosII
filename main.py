@@ -17,7 +17,7 @@ def traducir_ia(texto_usuario):
     - cd <ruta>                 (Para entrar a una carpeta)
     - cd ..                     (Para regresar atrás)
     - type <nombre> "<texto>"   (Para crear archivos con contenido)
-    - rmdir /s /q <nombre>      (Para borrar carpetas)
+    - rmdir <nombre>            (Para borrar carpetas)
     - dir                       (Para ver el contenido)
     - log                       (Para ver historial)
     - clear log                 (Para borrar historial)
@@ -103,7 +103,10 @@ def main():
             sistema.guardar_sistema()
         elif accion == "rmdir":
             sistema.rmdir(argumento)
-            sistema.guardar_sistema()
+            sistema.guardar_sistema() 
+        elif accion == "clear": 
+            sistema.vaciar_logs()
+
         elif accion == "log":
             sistema.logs.mostrar_historial()
         elif accion == "salir":

@@ -5,3 +5,4 @@
  # En el fichero sistema.py se importo json y os para convertir los nodos a diccionarios y verificar si es carpeta para recorrer su lista enlazada de hijos
  # En el fichero sistema.py se hicieron los metodos para guardar y cargar sistema, de directorio a nodo para depues actualizar el main
 Se agrego el metodo para guardar, type, rmdir, pero guardar tiene un bug
+ # Se soluciono el error cuando se borran carpetas, problema de tipeo en las instrucciones de la IA

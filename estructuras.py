@@ -57,3 +57,7 @@ class PilaLogs:
         while actual:
             print(f"> {actual.contenido}")
             actual = actual.siguiente
+    
+    def limpiar(self):
+        self.tope = None
+        print("--- Historial de logs eliminado ---")

@@ -13,6 +13,12 @@
                     "es_carpeta": false,
                     "contenido": "",
                     "hijos": []
+                },
+                {
+                    "nombre": "Prueba",
+                    "es_carpeta": true,
+                    "contenido": "",
+                    "hijos": []
                 }
             ]
         }

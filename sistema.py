@@ -61,6 +61,50 @@ class SistemaArchivos:
         
         print(f"[Sistema] Archivo '{nombre_archivo}' creado exitosamente.")
         self.registrar_log(f"type {nombre_archivo}")
+    
+    def rmdir(self, nombre_a_borrar):
+        cola = self.actual.lista_hijos
+        
+        if not cola.cabeza:
+            print(f"[Error] No se encontró '{nombre_a_borrar}'.")
+            return
+
+       
+        if cola.cabeza.nombre == nombre_a_borrar:
+            cola.cabeza = cola.cabeza.siguiente
+           
+            if cola.cabeza is None:
+                cola.cola = None
+            
+            print(f"[Sistema] '{nombre_a_borrar}' eliminado exitosamente.")
+            self.registrar_log(f"rmdir {nombre_a_borrar}")
+            return
+
+  
+        anterior = cola.cabeza
+        actual = cola.cabeza.siguiente
+        
+        while actual:
+            if actual.nombre == nombre_a_borrar:
+                 
+                anterior.siguiente = actual.siguiente
+                
+                 
+                if actual.siguiente is None:
+                    cola.cola = anterior
+                
+                print(f"[Sistema] '{nombre_a_borrar}' eliminado exitosamente.")
+                self.registrar_log(f"rmdir {nombre_a_borrar}")
+                return
+            
+            
+            anterior = actual
+            actual = actual.siguiente
+
+        print(f"[Error] No se encontró '{nombre_a_borrar}'.")
+
+    def vaciar_logs(self):
+        self.logs.limpiar()
 
     def guardar_sistema(self):
         data = self._nodo_a_dict(self.raiz)
@@ -94,9 +138,9 @@ class SistemaArchivos:
         with open("filesystem_backup.json", "r") as archivo:
             data = json.load(archivo)
         
-        # Reconstruimos la raíz
+        
         self.raiz = self._dict_a_nodo(data, None)
-        self.actual = self.raiz # Reiniciamos el puntero al inicio
+        self.actual = self.raiz 
         print("[Sistema] Sistema de archivos restaurado exitosamente.")
 
     def _dict_a_nodo(self, data, padre):
