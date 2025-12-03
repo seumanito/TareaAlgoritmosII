@@ -2,3 +2,6 @@
  # Ya creado el repositorio y la API Key creo el archivo estructuras.py que tenga la Clase Nodo para trabajar la listas y colas, ademas cada fichero necesita saber quien es su padre para realizar el cd ... La Clase ColaHijos para que al crear un archivo se almacene al final de la lista. La Clase PilaLogs Para registrar las operaciones como indica el PDF 
  # Luego se crea el fichero sistema.py Importando lo de estructuras.py donde la clase SistemaArchivos donde se crea la Raiz C:, se inicializa la cola de hijos de la raiz, donde se encuentran los punteros y se realizan los comandos.
  # Se crea la el archivo main.py donde pegamos el codigo de Cohere y se une con SistemasArchivos y realizamos la logica, primero se realizara pruebas sin conectar la IA Completamente
+ # En el fichero sistema.py se importo json y os para convertir los nodos a diccionarios y verificar si es carpeta para recorrer su lista enlazada de hijos
+ # En el fichero sistema.py se hicieron los metodos para guardar y cargar sistema, de directorio a nodo para depues actualizar el main
+Se agrego el metodo para guardar, type, rmdir, pero guardar tiene un bug
