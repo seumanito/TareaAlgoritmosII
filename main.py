@@ -3,7 +3,7 @@ import cohere
 from sistema import SistemaArchivos
 
 
-co = cohere.Client("8u0JnTzSNxLXBrbFwTPIvVuNS11orWR363AN8SqZ") 
+co = cohere.Client("AQUI VA TU API KEY DE COHERE") 
 
 def traducir_ia(texto_usuario):
 
