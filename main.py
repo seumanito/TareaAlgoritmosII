@@ -43,10 +43,7 @@ def traducir_ia(texto_usuario):
 
 def main():
     sistema = SistemaArchivos()
-    
-    # IMPORTANTE: Por ahora la persistencia (cargar) está desactivada 
-    # hasta que terminemos la lógica de guardado de árboles.
-    # sistema.cargar_sistema() 
+    sistema.cargar_sistema() 
 
     print("--- Sistema de Archivos de Árboles (Parcial V) ---")
     print("Unidades disponibles: C:, D:, F:")
@@ -57,8 +54,8 @@ def main():
         ruta_actual = f"{sistema.unidad_actual.letra}/{sistema.carpeta_actual.nombre}"
         entrada = input(f"{ruta_actual}> ")
         
-        if () == "salir":
-            # sistema.guardar_sistema() # Desactivado temporalmente
+        if entrada.lower() == "salir":
+            sistema.guardar_sistema()
             break
         
         primer_palabra=entrada.split()[0].lower()

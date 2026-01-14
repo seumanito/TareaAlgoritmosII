@@ -1,26 +1,57 @@
 {
-    "nombre": "C:",
-    "es_carpeta": true,
-    "contenido": "",
-    "hijos": [
+    "unidades": [
         {
-            "nombre": "universidad",
-            "es_carpeta": true,
-            "contenido": "",
-            "hijos": [
-                {
-                    "nombre": "Hola.txt",
-                    "es_carpeta": false,
-                    "contenido": "",
-                    "hijos": []
-                },
-                {
-                    "nombre": "Prueba",
-                    "es_carpeta": true,
-                    "contenido": "",
-                    "hijos": []
-                }
-            ]
+            "letra": "C:",
+            "raiz_carpeta": {
+                "nombre": "C:",
+                "archivos": [],
+                "subcarpetas": [
+                    {
+                        "nombre": "Prueba",
+                        "archivos": [
+                            {
+                                "nombre": "notas.txt",
+                                "contenido": "14",
+                                "tamano": 2
+                            }
+                        ],
+                        "subcarpetas": []
+                    }
+                ]
+            }
+        },
+        {
+            "letra": "D:",
+            "raiz_carpeta": {
+                "nombre": "D:",
+                "archivos": [],
+                "subcarpetas": [
+                    {
+                        "nombre": "Pais",
+                        "archivos": [],
+                        "subcarpetas": []
+                    },
+                    {
+                        "nombre": "QueLoQue",
+                        "archivos": [
+                            {
+                                "nombre": "foto.jpg",
+                                "contenido": "valencia",
+                                "tamano": 8
+                            }
+                        ],
+                        "subcarpetas": []
+                    }
+                ]
+            }
+        },
+        {
+            "letra": "F:",
+            "raiz_carpeta": {
+                "nombre": "F:",
+                "archivos": [],
+                "subcarpetas": []
+            }
         }
     ]
 }
