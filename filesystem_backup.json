@@ -1,26 +1,114 @@
 {
-    "nombre": "C:",
-    "es_carpeta": true,
-    "contenido": "",
-    "hijos": [
+    "unidades": [
         {
-            "nombre": "universidad",
-            "es_carpeta": true,
-            "contenido": "",
-            "hijos": [
-                {
-                    "nombre": "Hola.txt",
-                    "es_carpeta": false,
-                    "contenido": "",
-                    "hijos": []
-                },
-                {
-                    "nombre": "Prueba",
-                    "es_carpeta": true,
-                    "contenido": "",
-                    "hijos": []
-                }
-            ]
+            "letra": "C:",
+            "raiz_carpeta": {
+                "nombre": "C:",
+                "archivos": [
+                    {
+                        "nombre": "carta.txt",
+                        "contenido": "hola",
+                        "tamano": 4
+                    }
+                ],
+                "subcarpetas": [
+                    {
+                        "nombre": "Prueba",
+                        "archivos": [
+                            {
+                                "nombre": "notas.txt",
+                                "contenido": "14",
+                                "tamano": 2
+                            }
+                        ],
+                        "subcarpetas": []
+                    },
+                    {
+                        "nombre": "Tarea",
+                        "archivos": [],
+                        "subcarpetas": [
+                            {
+                                "nombre": "Parcial",
+                                "archivos": [],
+                                "subcarpetas": []
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "letra": "D:",
+            "raiz_carpeta": {
+                "nombre": "D:",
+                "archivos": [
+                    {
+                        "nombre": "reporte.txt",
+                        "contenido": "hola mundo",
+                        "tamano": 10
+                    }
+                ],
+                "subcarpetas": [
+                    {
+                        "nombre": "Pais",
+                        "archivos": [],
+                        "subcarpetas": []
+                    },
+                    {
+                        "nombre": "QueLoQue",
+                        "archivos": [
+                            {
+                                "nombre": "foto.jpg",
+                                "contenido": "valencia",
+                                "tamano": 8
+                            }
+                        ],
+                        "subcarpetas": []
+                    },
+                    {
+                        "nombre": "Trabajos",
+                        "archivos": [
+                            {
+                                "nombre": "\"tesis",
+                                "contenido": "final importante",
+                                "tamano": 16
+                            }
+                        ],
+                        "subcarpetas": []
+                    }
+                ]
+            }
+        },
+        {
+            "letra": "F:",
+            "raiz_carpeta": {
+                "nombre": "F:",
+                "archivos": [],
+                "subcarpetas": [
+                    {
+                        "nombre": "Tarea",
+                        "archivos": [
+                            {
+                                "nombre": "corto.txt",
+                                "contenido": "hola",
+                                "tamano": 4
+                            },
+                            {
+                                "nombre": "corto.txt",
+                                "contenido": "hola mundo este es un texto largo",
+                                "tamano": 33
+                            }
+                        ],
+                        "subcarpetas": [
+                            {
+                                "nombre": "Prueba",
+                                "archivos": [],
+                                "subcarpetas": []
+                            }
+                        ]
+                    }
+                ]
+            }
         }
     ]
 }
