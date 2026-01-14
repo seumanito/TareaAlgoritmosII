@@ -1,63 +1,155 @@
+# estructuras.py
 
-
-class Nodo:
-    def __init__(self, nombre, es_carpeta, padre=None):
+# 1. NODO PARA ARCHIVOS (Árbol Binario)
+# Se ordenan por nombre: Menores a la izquierda, Mayores a la derecha
+class NodoArchivo:
+    def __init__(self, nombre, contenido=""):
         self.nombre = nombre
-        self.es_carpeta = es_carpeta  # True si es carpeta, False si es archivo
-        self.padre = padre            # Puntero al directorio anterior (para cd ..)
-        self.contenido = ""           # Para el comando TYPE
-        self.siguiente = None         # Puntero al siguiente nodo (Lista Enlazada)
+        self.contenido = contenido
+        self.tamano = len(contenido) # Para el buscador por rango
+        self.izq = None  # Hijo Izquierdo
+        self.der = None  # Hijo Derecho
+
+# 2. NODO PARA CARPETAS (Árbol N-ario)
+# Usaremos la representación "Primer Hijo - Siguiente Hermano" para simular N-ario
+class NodoCarpeta:
+    def __init__(self, nombre, padre=None):
+        self.nombre = nombre
+        self.padre = padre
         
-        # Punteros para manejar los hijos como una COLA (Queue)
-        self.hijos_cabeza = None      # Primer hijo
-        self.hijos_cola = None        # Último hijo
+        # Estructura N-aria para SUB-CARPETAS (Lista enlazada de hermanos)
+        self.hijo_carpeta = None      # Primer hijo carpeta
+        self.siguiente_carpeta = None # Siguiente hermano carpeta
+        
+        # Estructura Binaria para ARCHIVOS (Raíz del árbol binario)
+        self.raiz_archivos = None     # Aquí empieza el árbol de archivos de esta carpeta
 
-class ColaHijos:
-    def __init__(self):
-        self.cabeza = None
-        self.cola = None
+# 3. NODO PARA UNIDADES (Lista Enlazada)
+class NodoUnidad:
+    def __init__(self, letra):
+        self.letra = letra # Ej: "C:", "D:"
+        self.raiz_carpeta = NodoCarpeta(letra) # Cada unidad tiene su carpeta raíz
+        self.siguiente = None # Siguiente unidad (C -> D -> F)
 
-    def encolar(self, nuevo_nodo):
-        #Agrega un archivo/carpeta al final de la lista
-        if self.cabeza is None:
-            self.cabeza = nuevo_nodo
-            self.cola = nuevo_nodo
-        else:
-            self.cola.siguiente = nuevo_nodo
-            self.cola = nuevo_nodo
-
-    def buscar(self, nombre):
-        #Busca un nodo por nombre en la lista enlazada
-        actual = self.cabeza
-        while actual:
-            if actual.nombre == nombre:
-                return actual
-            actual = actual.siguiente
-        return None
-    
-
+# 4. PILA DE LOGS (Se mantiene igual, es útil)
 class PilaLogs:
     def __init__(self):
-        self.tope = None # El elemento de más arriba
+        self.tope = None
+
+    class NodoLog:
+        def __init__(self, mensaje):
+            self.mensaje = mensaje
+            self.siguiente = None
 
     def push(self, mensaje):
-        """Agrega un log al tope"""
-        nuevo_log = Nodo("Log", False) # Reutilizamos Nodo o creamos uno simple
-        nuevo_log.contenido = mensaje
-        
-        if self.tope is None:
-            self.tope = nuevo_log
-        else:
-            nuevo_log.siguiente = self.tope
-            self.tope = nuevo_log
+        nuevo = self.NodoLog(mensaje)
+        nuevo.siguiente = self.tope
+        self.tope = nuevo
     
     def mostrar_historial(self):
         actual = self.tope
-        print("--- Historial (LIFO) ---")
+        print("--- Historial ---")
         while actual:
-            print(f"> {actual.contenido}")
+            print(f"> {actual.mensaje}")
             actual = actual.siguiente
-    
+
     def limpiar(self):
         self.tope = None
-        print("--- Historial de logs eliminado ---")
+
+# --- AGREGAR AL FINAL DE estructuras.py ---
+
+class NodoB:
+    def __init__(self, t, hoja=False):
+        self.t = t              # Grado mínimo (define rango de claves)
+        self.hoja = hoja        # True si es hoja, False si es nodo interno
+        self.claves = []        # Lista de objetos (Metadata del archivo)
+        self.hijos = []         # Lista de punteros a hijos
+
+class ArbolB:
+    def __init__(self, t=3):
+        self.raiz = NodoB(t, True)
+        self.t = t
+
+    # Función principal de inserción
+    def insertar(self, nombre, ruta, tamano):
+        # Creamos el objeto de datos que guardaremos
+        dato = {"nombre": nombre, "ruta": ruta, "tamano": tamano}
+        
+        raiz = self.raiz
+        # Si la raíz está llena, el árbol crece hacia arriba
+        if len(raiz.claves) == (2 * self.t) - 1:
+            temp = NodoB(self.t, False)
+            self.raiz = temp
+            temp.hijos.insert(0, raiz)
+            self._dividir_hijo(temp, 0)
+            self._insertar_no_lleno(temp, dato)
+        else:
+            self._insertar_no_lleno(raiz, dato)
+
+    # Inserción auxiliar en nodo no lleno
+    def _insertar_no_lleno(self, x, k):
+        i = len(x.claves) - 1
+        
+        if x.hoja:
+            # Encontrar la posición correcta y desplazar
+            while i >= 0 and k["nombre"] < x.claves[i]["nombre"]:
+                i -= 1
+            x.claves.insert(i + 1, k)
+        else:
+            # Encontrar el hijo correcto
+            while i >= 0 and k["nombre"] < x.claves[i]["nombre"]:
+                i -= 1
+            i += 1
+            
+            # Si el hijo está lleno, dividirlo
+            if len(x.hijos[i].claves) == (2 * self.t) - 1:
+                self._dividir_hijo(x, i)
+                if k["nombre"] > x.claves[i]["nombre"]:
+                    i += 1
+            self._insertar_no_lleno(x.hijos[i], k)
+
+    # División de nodo (La magia del Árbol B)
+    def _dividir_hijo(self, x, i):
+        t = self.t
+        y = x.hijos[i]
+        z = NodoB(t, y.hoja)
+        
+        # Mover claves y hijos de Y a Z
+        x.hijos.insert(i + 1, z)
+        x.claves.insert(i, y.claves[t - 1])
+        
+        z.claves = y.claves[t:(2 * t) - 1]
+        y.claves = y.claves[0:t - 1]
+        
+        if not y.hoja:
+            z.hijos = y.hijos[t:(2 * t)]
+            y.hijos = y.hijos[0:t]
+
+    # Búsqueda simple (para probar)
+    def buscar(self, nombre, nodo=None):
+        if nodo is None:
+            nodo = self.raiz
+            
+        i = 0
+        while i < len(nodo.claves) and nombre > nodo.claves[i]["nombre"]:
+            i += 1
+            
+        if i < len(nodo.claves) and nombre == nodo.claves[i]["nombre"]:
+            return nodo.claves[i] # Encontrado
+        
+        if nodo.hoja:
+            return None # No está
+            
+        return self.buscar(nombre, nodo.hijos[i])
+
+    # Mostrar contenido (In-Orden)
+    def mostrar_indice(self, nodo=None):
+        if nodo is None: nodo = self.raiz
+        i = 0
+        for i in range(len(nodo.claves)):
+            if not nodo.hoja:
+                self.mostrar_indice(nodo.hijos[i])
+            c = nodo.claves[i]
+            print(f"[INDEX] {c['nombre']} - {c['ruta']} ({c['tamano']} bytes)")
+        if not nodo.hoja:
+            self.mostrar_indice(nodo.hijos[i + 1])

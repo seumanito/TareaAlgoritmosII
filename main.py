@@ -1,40 +1,31 @@
-
 import cohere
 from sistema import SistemaArchivos
 
-
-co = cohere.Client("AQUI VA TU API KEY DE COHERE") 
+# --- CONFIGURACIÓN IA ---
+co = cohere.Client("8u0JnTzSNxLXBrbFwTPIvVuNS11orWR363AN8SqZ") 
 
 def traducir_ia(texto_usuario):
-
-    # Instrucciones
     preamble = """
     Eres un traductor de comandos para un sistema operativo simulado.
-    Tu trabajo es convertir lenguaje natural a comandos técnicos exactos.
     
     COMANDOS VALIDOS:
-    - mkdir <nombre>            (Para crear carpetas)
-    - cd <ruta>                 (Para entrar a una carpeta)
-    - cd ..                     (Para regresar atrás)
-    - type <nombre> "<texto>"   (Para crear archivos con contenido)
-    - rmdir <nombre>            (Para borrar carpetas)
-    - dir                       (Para ver el contenido)
-    - log                       (Para ver historial)
-    - clear log                 (Para borrar historial)
+    - mkdir <nombre>            (Crear carpeta)
+    - cd <ruta>                 (Moverse: "cd D:", "cd Fotos", "cd ..")
+    - type <nombre> "<texto>"   (Crear archivo)
+    - dir                       (Listar contenido)
+    - log                       (Ver historial)
+    - clear log                 (Borrar historial)
     
     EJEMPLOS:
-    Usuario: "Crea una carpeta llamada Fotos" -> Tu respuesta: mkdir Fotos
-    Usuario: "Entra a la carpeta Documentos" -> Tu respuesta: cd Documentos
-    Usuario: "Regresa" -> Tu respuesta: cd ..
-    Usuario: "Qué hay aquí?" -> Tu respuesta: dir
-    Usuario: "Crea un archivo Notas.txt que diga Hola" -> Tu respuesta: type Notas.txt "Hola"
+    "Crea carpeta Tareas" -> mkdir Tareas
+    "Cambia a la unidad D" -> cd D:
+    "Entra a Documentos" -> cd Documentos
+    "Regresa" -> cd ..
     
-    Responde ÚNICAMENTE con el comando. No digas "Aquí tienes el comando", ni saludes.
-    Si el usuario dice algo que no es una orden (ej: "Hola"), responde: ninguno
+    Responde ÚNICAMENTE con el comando técnico. Si no es comando, responde: ninguno
     """
 
     try:
-    
         response = co.chat(
             model="command-r-08-2024", 
             message=texto_usuario,
@@ -42,75 +33,80 @@ def traducir_ia(texto_usuario):
             temperature=0.0 
         )
         
-  
-        comando_limpio = response.text.strip()
-        
-        if "ninguno" in comando_limpio.lower():
-            return None
-            
-        return comando_limpio
+        comando = response.text.strip()
+        if "ninguno" in comando.lower(): return None
+        return comando
 
     except Exception as e:
         print(f"Error IA: {e}")
         return None
-    pass 
 
 def main():
     sistema = SistemaArchivos()
+    
+    # IMPORTANTE: Por ahora la persistencia (cargar) está desactivada 
+    # hasta que terminemos la lógica de guardado de árboles.
+    # sistema.cargar_sistema() 
 
-    sistema.cargar_sistema()
-    print("Consola del Sistema de Archivos Simulado")
+    print("--- Sistema de Archivos de Árboles (Parcial V) ---")
+    print("Unidades disponibles: C:, D:, F:")
+
     while True:
-        entrada = input(f"{sistema.actual.nombre}> ")
+        # 1. Prompt Dinámico: Muestra Unidad + Carpeta
+        # Ej: C:/Documentos> 
+        ruta_actual = f"{sistema.unidad_actual.letra}/{sistema.carpeta_actual.nombre}"
+        entrada = input(f"{ruta_actual}> ")
         
-        if entrada.lower() == "salir":
+        if () == "salir":
+            # sistema.guardar_sistema() # Desactivado temporalmente
             break
-            
-
-        comando = traducir_ia(entrada)
+        
+        primer_palabra=entrada.split()[0].lower()
+        comandos_conocidos=["mkdir", "cd", "type", "rmdir", "dir", "log", "clear","index"]
+        if  primer_palabra in comandos_conocidos:
+            comando=entrada
+        else:
+            comando = traducir_ia(entrada)
         
         if comando is None:
             print("Chatbot: No entendí eso como una orden válida.")
             continue
             
-        print(f" Comando detectado: {comando}") 
-        
+        print(f"🤖 Comando: {comando}") 
 
+        # 3. Ejecución
         partes = comando.split(" ", 1)
         accion = partes[0].lower()
         argumento = partes[1] if len(partes) > 1 else ""
         
-        if accion == "mkdir":
-            sistema.mkdir(argumento)
-            sistema.guardar_sistema()
-        elif accion == "cd":
-            sistema.cd(argumento)
-        elif accion == "dir":
-            sistema.dir()
-        elif accion == "type":
-
-            datos_archivo = argumento.split(" ", 1)
+        try:
+            if accion == "mkdir":
+                sistema.mkdir(argumento)
             
-            nombre_archivo = datos_archivo[0]
+            elif accion == "cd":
+                sistema.cd(argumento)
             
-            if len(datos_archivo) > 1:
-                contenido = datos_archivo[1].strip('"') 
-            else:
-                contenido = "" 
-
-           
-            sistema.type(nombre_archivo, contenido)
-            sistema.guardar_sistema()
-        elif accion == "rmdir":
-            sistema.rmdir(argumento)
-            sistema.guardar_sistema() 
-        elif accion == "clear": 
-            sistema.vaciar_logs()
-
-        elif accion == "log":
-            sistema.logs.mostrar_historial()
-        elif accion == "salir":
-            break
+            elif accion == "dir":
+                sistema.dir()
+            
+            elif accion == "type":
+                # Lógica para separar nombre y contenido (Igual que antes)
+                datos = argumento.split(" ", 1)
+                nombre = datos[0]
+                contenido = datos[1].strip('"') if len(datos) > 1 else ""
+                sistema.type(nombre, contenido)
+                
+            elif accion == "log":
+                sistema.logs.mostrar_historial()
+                
+            elif accion == "clear": # Para "clear log"
+                sistema.logs.limpiar()
+            
+            elif accion =="index":
+                sistema.index_dump()
+                
+        except Exception as e:
+            print(f"Error ejecutando comando: {e}")
 
 if __name__ == "__main__":
     main()

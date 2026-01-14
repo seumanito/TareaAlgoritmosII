@@ -1,164 +1,140 @@
-
+# sistema.py
 import json
 import os
-
-from estructuras import Nodo, ColaHijos, PilaLogs
+from estructuras import NodoUnidad, NodoCarpeta, NodoArchivo, PilaLogs, ArbolB
 from datetime import datetime
 
 class SistemaArchivos:
     def __init__(self):
-        self.raiz = Nodo("C:", True, None)
-        self.raiz.lista_hijos = ColaHijos() 
+        # 1. Crear las unidades C, D, F
+        self.unidad_c = NodoUnidad("C:")
+        self.unidad_d = NodoUnidad("D:")
+        self.unidad_f = NodoUnidad("F:")
         
-        self.actual = self.raiz  
-        self.logs = PilaLogs()  
+        # Enlazarlas (C -> D -> F)
+        self.unidad_c.siguiente = self.unidad_d
+        self.unidad_d.siguiente = self.unidad_f
+        
+        # Punteros de navegación
+        self.unidad_actual = self.unidad_c
+        self.carpeta_actual = self.unidad_c.raiz_carpeta
+        
+        self.indice_global=ArbolB(t=3)
+        self.logs = PilaLogs()
 
-    def registrar_log(self, comando, estado="Exito"):
+    def registrar_log(self, comando):
         fecha = datetime.now().strftime("%H:%M:%S")
-        mensaje = f"[{fecha}] {comando} -> {estado}"
-        self.logs.push(mensaje)
+        self.logs.push(f"[{fecha}] {comando}")
 
-    def mkdir(self, nombre_carpeta):
-       
-        nuevo = Nodo(nombre_carpeta, True, self.actual)
-        nuevo.lista_hijos = ColaHijos() 
-        
-        
-        self.actual.lista_hijos.encolar(nuevo)
-        
-        self.registrar_log(f"mkdir {nombre_carpeta}")
-        print(f"Carpeta '{nombre_carpeta}' creada en {self.actual.nombre}")
-
+    # --- COMANDO CD (Navegación entre unidades y carpetas) ---
     def cd(self, ruta):
-        if ruta == "..":
-            if self.actual.padre:
-                self.actual = self.actual.padre
-            return
-
-        nodo_destino = self.actual.lista_hijos.buscar(ruta)
-        
-        if nodo_destino and nodo_destino.es_carpeta:
-            self.actual = nodo_destino
-            self.registrar_log(f"cd {ruta}")
-        else:
-            print("Error: Directorio no encontrado")
-            self.registrar_log(f"cd {ruta}", "Error")
-            
-    def dir(self):
-        print(f"\nDirectorio de {self.actual.nombre}")
-        temp = self.actual.lista_hijos.cabeza
-        while temp:
-            tipo = "<DIR>" if temp.es_carpeta else "<FILE>"
-            print(f"{tipo}\t{temp.nombre}")
-            temp = temp.siguiente
-
-    def type(self, nombre_archivo, contenido_texto):
-
-        nuevo_archivo = Nodo(nombre_archivo, False, self.actual)
-        nuevo_archivo.contenido = contenido_texto
-
-        self.actual.lista_hijos.encolar(nuevo_archivo)
-        
-        print(f"[Sistema] Archivo '{nombre_archivo}' creado exitosamente.")
-        self.registrar_log(f"type {nombre_archivo}")
-    
-    def rmdir(self, nombre_a_borrar):
-        cola = self.actual.lista_hijos
-        
-        if not cola.cabeza:
-            print(f"[Error] No se encontró '{nombre_a_borrar}'.")
-            return
-
-       
-        if cola.cabeza.nombre == nombre_a_borrar:
-            cola.cabeza = cola.cabeza.siguiente
-           
-            if cola.cabeza is None:
-                cola.cola = None
-            
-            print(f"[Sistema] '{nombre_a_borrar}' eliminado exitosamente.")
-            self.registrar_log(f"rmdir {nombre_a_borrar}")
-            return
-
-  
-        anterior = cola.cabeza
-        actual = cola.cabeza.siguiente
-        
-        while actual:
-            if actual.nombre == nombre_a_borrar:
-                 
-                anterior.siguiente = actual.siguiente
-                
-                 
-                if actual.siguiente is None:
-                    cola.cola = anterior
-                
-                print(f"[Sistema] '{nombre_a_borrar}' eliminado exitosamente.")
-                self.registrar_log(f"rmdir {nombre_a_borrar}")
-                return
-            
-            
-            anterior = actual
-            actual = actual.siguiente
-
-        print(f"[Error] No se encontró '{nombre_a_borrar}'.")
-
-    def vaciar_logs(self):
-        self.logs.limpiar()
-
-    def guardar_sistema(self):
-        data = self._nodo_a_dict(self.raiz)
-        
-        with open("filesystem_backup.json", "w") as archivo:
-            json.dump(data, archivo, indent=4)
-        print("[Sistema] Copia de seguridad guardada.")
-
-    def _nodo_a_dict(self, nodo):
-        diccionario = {
-            "nombre": nodo.nombre,
-            "es_carpeta": nodo.es_carpeta,
-            "contenido": nodo.contenido,
-            "hijos": []
-        }
-
-        if nodo.es_carpeta and hasattr(nodo, 'lista_hijos'):
-            temp = nodo.lista_hijos.cabeza 
-            
+        # 1. Cambio de UNIDAD (Ej: "D:")
+        if ruta.upper() in ["C:", "D:", "F:"]:
+            temp = self.unidad_c
             while temp:
-                diccionario["hijos"].append(self._nodo_a_dict(temp))
+                if temp.letra == ruta.upper():
+                    self.unidad_actual = temp
+                    self.carpeta_actual = temp.raiz_carpeta
+                    print(f"[Sistema] Cambiado a unidad {temp.letra}")
+                    return
                 temp = temp.siguiente
+            return
+
+        # 2. Regresar al padre (..)
+        if ruta == "..":
+            if self.carpeta_actual.padre:
+                self.carpeta_actual = self.carpeta_actual.padre
+            return
+
+        # 3. Entrar a una carpeta (Busqueda en Árbol N-ario)
+        # En "Primer Hijo - Siguiente Hermano", buscamos linealmente en los hijos
+        hijo = self.carpeta_actual.hijo_carpeta
+        encontrado = False
+        while hijo:
+            if hijo.nombre == ruta:
+                self.carpeta_actual = hijo
+                encontrado = True
+                break
+            hijo = hijo.siguiente_carpeta
         
-        return diccionario
+        if not encontrado:
+            print(f"[Error] No existe la carpeta '{ruta}'")
+
+    # --- COMANDO MKDIR (Insertar en Árbol N-ario) ---
+    def mkdir(self, nombre):
+        nuevo = NodoCarpeta(nombre, padre=self.carpeta_actual)
+        
+        # Insertar al final de la lista de hermanos (hijos del actual)
+        if not self.carpeta_actual.hijo_carpeta:
+            self.carpeta_actual.hijo_carpeta = nuevo
+        else:
+            temp = self.carpeta_actual.hijo_carpeta
+            while temp.siguiente_carpeta:
+                temp = temp.siguiente_carpeta
+            temp.siguiente_carpeta = nuevo
+            
+        print(f"Carpeta '{nombre}' creada en {self.carpeta_actual.nombre}")
+        self.registrar_log(f"mkdir {nombre}")
+        self.guardar_sistema() # Persistencia
+
+    # --- COMANDO TYPE (Insertar en Árbol Binario) ---
+    def type(self, nombre, contenido):
+        nuevo_archivo = NodoArchivo(nombre, contenido)
+        
+        if self.carpeta_actual.raiz_archivos is None:
+            self.carpeta_actual.raiz_archivos = nuevo_archivo
+        else:
+            self._insertar_binario(self.carpeta_actual.raiz_archivos, nuevo_archivo)
+        
+        ruta_full=f"{self.unidad_actual.letra}/{self.carpeta_actual.nombre}/{nombre}"
+        tamano=len(contenido)
+        self.indice_global.insertar(nombre,ruta_full,tamano)
+
+        print(f"Archivo '{nombre}' creado.")
+        self.registrar_log(f"type {nombre}")
+        self.guardar_sistema()
+
+    def index_dump(self):
+        print("\n---INDICE GLOBAL (ARBOL B)---")
+        self.indice_global.mostrar_indice()
+
+    def _insertar_binario(self, raiz, nuevo):
+        # Lógica de inserción recursiva (Alfabética)
+        if nuevo.nombre < raiz.nombre:
+            if raiz.izq is None:
+                raiz.izq = nuevo
+            else:
+                self._insertar_binario(raiz.izq, nuevo)
+        else:
+            if raiz.der is None:
+                raiz.der = nuevo
+            else:
+                self._insertar_binario(raiz.der, nuevo)
+
+    # --- COMANDO DIR (Mostrar Carpetas + Archivos In-Order) ---
+    def dir(self):
+        print(f"\n--- Contenido de {self.unidad_actual.letra}\...\{self.carpeta_actual.nombre} ---")
+        
+        # 1. Listar Carpetas (Iterando hermanos)
+        temp = self.carpeta_actual.hijo_carpeta
+        while temp:
+            print(f"[DIR]  {temp.nombre}")
+            temp = temp.siguiente_carpeta
+            
+        # 2. Listar Archivos (Recorrido In-Orden del Árbol Binario)
+        self._mostrar_inorden(self.carpeta_actual.raiz_archivos)
+
+    def _mostrar_inorden(self, nodo):
+        if nodo:
+            self._mostrar_inorden(nodo.izq)
+            print(f"[FILE] {nodo.nombre} ({nodo.tamano} bytes)")
+            self._mostrar_inorden(nodo.der)
+
+    # --- PERSISTENCIA (Simplificada para el ejemplo) ---
+    # NOTA: Debes adaptar tu guardar/cargar antiguo para soportar estas nuevas estructuras.
+    # Por ahora dejé el placeholder.
+    def guardar_sistema(self):
+        pass 
     
     def cargar_sistema(self):
-        if not os.path.exists("filesystem_backup.json"):
-            print("[Sistema] No se encontró respaldo previo. Iniciando desde cero.")
-            return
-
-        with open("filesystem_backup.json", "r") as archivo:
-            data = json.load(archivo)
-        
-        
-        self.raiz = self._dict_a_nodo(data, None)
-        self.actual = self.raiz 
-        print("[Sistema] Sistema de archivos restaurado exitosamente.")
-
-    def _dict_a_nodo(self, data, padre):
-        
-        
-        nuevo_nodo = Nodo(data["nombre"], data["es_carpeta"], padre)
-        nuevo_nodo.contenido = data.get("contenido", "")
-        
-       
-        if nuevo_nodo.es_carpeta:
-            
-            nuevo_nodo.lista_hijos = ColaHijos() 
-
-        
-        for hijo_data in data["hijos"]:
-            
-            hijo_nodo = self._dict_a_nodo(hijo_data, nuevo_nodo)
-            
-            nuevo_nodo.lista_hijos.encolar(hijo_nodo)
-        
-        return nuevo_nodo   
+        pass
