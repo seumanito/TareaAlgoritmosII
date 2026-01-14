@@ -84,8 +84,46 @@ def main():
                 sistema.cd(argumento)
             
             elif accion == "dir":
-                sistema.dir()
-            
+                # Caso 1: DIR normal
+                if not argumento:
+                    sistema.dir()
+                
+                # Caso 2: DIR SEARCH
+                elif argumento.startswith("search"):
+                    parts = argumento.split()
+                    # Ejemplo: ['search', '-file', 'test', '-range', '10-20']
+                    
+                    # A. Búsqueda por Rango (-file y -range)
+                    if "-range" in parts and "-file" in parts:
+                        try:
+                            idx_file = parts.index("-file") + 1
+                            idx_range = parts.index("-range") + 1
+                            
+                            nombre = parts[idx_file]
+                            rango = parts[idx_range].split("-") # "10-20" -> ["10", "20"]
+                            
+                            sistema.dir_search_range(nombre, rango[0], rango[1])
+                        except:
+                            print("Error: Uso correcto -> dir search -file <nombre> -range <min>-<max>")
+
+                    # B. Búsqueda solo Archivo (-file)
+                    elif "-file" in parts:
+                        try:
+                            idx_file = parts.index("-file") + 1
+                            nombre = parts[idx_file]
+                            sistema.dir_search_file(nombre)
+                        except:
+                            print("Error: Falta el nombre del archivo.")
+
+                    # C. Búsqueda de Carpeta (Sin flags raros, solo el nombre)
+                    else:
+                        # Lo que quede después de 'search' es el nombre
+                        nombre_carpeta = argumento.replace("search", "").strip()
+                        if nombre_carpeta:
+                            sistema.dir_search_folder(nombre_carpeta)
+                        else:
+                            print("Error: Especifique nombre de carpeta.")
+                
             elif accion == "type":
                 # Lógica para separar nombre y contenido (Igual que antes)
                 datos = argumento.split(" ", 1)
@@ -99,8 +137,44 @@ def main():
             elif accion == "clear": # Para "clear log"
                 sistema.logs.limpiar()
             
-            elif accion =="index":
-                sistema.index_dump()
+            elif accion == "index":
+                # Si no hay argumentos, mostramos todo (Dump)
+                if not argumento or argumento == "search": # Por si escribe solo "index search"
+                    sistema.index_dump()
+                
+                # Si hay búsqueda
+                elif argumento.startswith("search"):
+                    parts = argumento.split()
+                    # Ejemplo: ['search', '-file', 'test', '-range', '5-12']
+                    
+                    nombre_buscado = None
+                    min_s = 0
+                    max_s = float('inf')
+                    
+                    try:
+                        # 1. Detectar filtro de Nombre (-file o directo)
+                        if "-file" in parts:
+                            idx = parts.index("-file") + 1
+                            if idx < len(parts): nombre_buscado = parts[idx]
+                        elif "-range" not in parts: 
+                            # Si escribe "index search notas" (sin flags)
+                            nombre_buscado = argumento.replace("search", "").strip()
+
+                        # 2. Detectar filtro de Rango (-range)
+                        if "-range" in parts:
+                            idx = parts.index("-range") + 1
+                            if idx < len(parts):
+                                rango = parts[idx].split("-")
+                                min_s = int(rango[0])
+                                max_s = int(rango[1])
+
+                        # Ejecutar la búsqueda global
+                        sistema.index_search(nombre_buscado, min_s, max_s)
+                        
+                    except ValueError:
+                        print("Error: El rango debe ser numérico (ej: -range 10-20)")
+                    except Exception as e:
+                        print(f"Error en sintaxis: {e}")
                 
         except Exception as e:
             print(f"Error ejecutando comando: {e}")

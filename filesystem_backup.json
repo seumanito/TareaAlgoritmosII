@@ -4,7 +4,13 @@
             "letra": "C:",
             "raiz_carpeta": {
                 "nombre": "C:",
-                "archivos": [],
+                "archivos": [
+                    {
+                        "nombre": "carta.txt",
+                        "contenido": "hola",
+                        "tamano": 4
+                    }
+                ],
                 "subcarpetas": [
                     {
                         "nombre": "Prueba",
@@ -16,6 +22,17 @@
                             }
                         ],
                         "subcarpetas": []
+                    },
+                    {
+                        "nombre": "Tarea",
+                        "archivos": [],
+                        "subcarpetas": [
+                            {
+                                "nombre": "Parcial",
+                                "archivos": [],
+                                "subcarpetas": []
+                            }
+                        ]
                     }
                 ]
             }
@@ -24,7 +41,13 @@
             "letra": "D:",
             "raiz_carpeta": {
                 "nombre": "D:",
-                "archivos": [],
+                "archivos": [
+                    {
+                        "nombre": "reporte.txt",
+                        "contenido": "hola mundo",
+                        "tamano": 10
+                    }
+                ],
                 "subcarpetas": [
                     {
                         "nombre": "Pais",
@@ -41,6 +64,17 @@
                             }
                         ],
                         "subcarpetas": []
+                    },
+                    {
+                        "nombre": "Trabajos",
+                        "archivos": [
+                            {
+                                "nombre": "\"tesis",
+                                "contenido": "final importante",
+                                "tamano": 16
+                            }
+                        ],
+                        "subcarpetas": []
                     }
                 ]
             }
@@ -50,7 +84,30 @@
             "raiz_carpeta": {
                 "nombre": "F:",
                 "archivos": [],
-                "subcarpetas": []
+                "subcarpetas": [
+                    {
+                        "nombre": "Tarea",
+                        "archivos": [
+                            {
+                                "nombre": "corto.txt",
+                                "contenido": "hola",
+                                "tamano": 4
+                            },
+                            {
+                                "nombre": "corto.txt",
+                                "contenido": "hola mundo este es un texto largo",
+                                "tamano": 33
+                            }
+                        ],
+                        "subcarpetas": [
+                            {
+                                "nombre": "Prueba",
+                                "archivos": [],
+                                "subcarpetas": []
+                            }
+                        ]
+                    }
+                ]
             }
         }
     ]

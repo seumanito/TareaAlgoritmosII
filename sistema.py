@@ -258,3 +258,100 @@ class SistemaArchivos:
             ultimo_hijo = hijo_nodo # Avanzamos el puntero del último hermano
             
         return nueva_carpeta
+    def index_search(self, nombre=None, min_s=0, max_s=float('inf')):
+        print(f"\n[Índice Global] Buscando: Nombre='{nombre if nombre else '*'}' | Tamaño={min_s}-{max_s} bytes")
+        
+        # Llamamos a la función nueva del Árbol B
+        resultados = self.indice_global.buscar_avanzado(nombre,min_s,max_s)
+        
+        if not resultados:
+            print("   No se encontraron coincidencias en ninguna unidad.")
+        else:
+            for i, arch in enumerate(resultados, 1):
+                print(f"   {i}. {arch['ruta']} ({arch['tamano']} KB)")
+        print("Operación completada.")
+
+    # 1. BÚSQUEDA DE CARPETAS (POST-ORDEN)
+    def dir_search_folder(self, nombre_buscado):
+        print(f"\n[Buscando carpeta '{nombre_buscado}' en POST-ORDEN...]")
+        encontrado = self._postorden_carpetas(self.unidad_actual.raiz_carpeta, nombre_buscado)
+        if not encontrado:
+            print("   No se encontró la carpeta.")
+
+    def _postorden_carpetas(self, nodo_carpeta, buscado):
+        if not nodo_carpeta: return False
+        
+        # 1. Primero recorremos los hijos (Post-Orden: Hijos -> Raíz)
+        hijo = nodo_carpeta.hijo_carpeta
+        while hijo:
+            if self._postorden_carpetas(hijo, buscado):
+                return True
+            hijo = hijo.siguiente_carpeta
+            
+        # 2. Luego verificamos el nodo actual (Raíz)
+        if nodo_carpeta.nombre == buscado:
+            print(f"   ¡Encontrada! -> {self.unidad_actual.letra}/.../{nodo_carpeta.nombre}")
+            # Aquí podrías listar su contenido si quisieras
+            return True
+        return False
+
+    # 2. BÚSQUEDA DE ARCHIVOS (PRE-ORDEN)
+    def dir_search_file(self, nombre_archivo):
+        print(f"\n[Buscando archivo '{nombre_archivo}' en PRE-ORDEN...]")
+        # Iniciamos la búsqueda recursiva desde la carpeta actual
+        self._preorden_archivos(self.carpeta_actual, nombre_archivo)
+
+    def _preorden_archivos(self, nodo_carpeta, buscado):
+        if not nodo_carpeta: return
+
+        # 1. Procesamos archivos de ESTA carpeta (Pre-Orden: Raíz -> Hijos)
+        # (Aquí usamos un helper para buscar en el árbol binario de la carpeta)
+        self._buscar_en_binario(nodo_carpeta.raiz_archivos, buscado)
+
+        # 2. Luego vamos a las subcarpetas
+        hijo = nodo_carpeta.hijo_carpeta
+        while hijo:
+            self._preorden_archivos(hijo, buscado)
+            hijo = hijo.siguiente_carpeta
+
+    def _buscar_en_binario(self, nodo_binario, buscado):
+        # Recorrido simple del árbol binario de archivos
+        if not nodo_binario: return
+        if buscado.lower() in nodo_binario.nombre.lower(): # Coincidencia parcial
+            print(f"   [FILE] {nodo_binario.nombre} ({nodo_binario.tamano} bytes)")
+        
+        self._buscar_en_binario(nodo_binario.izq, buscado)
+        self._buscar_en_binario(nodo_binario.der, buscado)
+
+    # 3. BÚSQUEDA POR RANGO (IN-ORDEN)
+    def dir_search_range(self, nombre, min_size, max_size):
+        print(f"\n[Buscando '{nombre}' entre {min_size}-{max_size} bytes en IN-ORDEN...]")
+        self._inorden_archivos(self.carpeta_actual, nombre, int(min_size), int(max_size))
+
+    def _inorden_archivos(self, nodo_carpeta, nombre, min_s, max_s):
+        if not nodo_carpeta: return
+
+        # 1. Buscar en el árbol binario de archivos (In-Orden: Izq -> Raíz -> Der)
+        self._recorrer_bst_inorden_rango(nodo_carpeta.raiz_archivos, nombre, min_s, max_s)
+
+        # 2. Recursividad a subcarpetas
+        hijo = nodo_carpeta.hijo_carpeta
+        while hijo:
+            self._inorden_archivos(hijo, nombre, min_s, max_s)
+            hijo = hijo.siguiente_carpeta
+
+    def _recorrer_bst_inorden_rango(self, nodo, nombre, min_s, max_s):
+        if not nodo: return
+        
+        # Izquierda
+        self._recorrer_bst_inorden_rango(nodo.izq, nombre, min_s, max_s)
+        
+        # Raíz (Procesar)
+        match_nombre = nombre.lower() in nodo.nombre.lower()
+        match_tamano = min_s <= nodo.tamano <= max_s
+        
+        if match_nombre and match_tamano:
+             print(f"   [MATCH] {nodo.nombre} ({nodo.tamano} bytes)")
+        
+        # Derecha
+        self._recorrer_bst_inorden_rango(nodo.der, nombre, min_s, max_s)

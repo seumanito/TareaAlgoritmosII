@@ -108,6 +108,41 @@ class ArbolB:
                     i += 1
             self._insertar_no_lleno(x.hijos[i], k)
 
+    def buscar_avanzado(self, filtro_nombre=None, min_s=0, max_s=float('inf'), nodo=None, resultados=None):
+        """Busca archivos que cumplan con el nombre parcial y/o el rango de tamaño"""
+        if nodo is None: nodo = self.raiz
+        if resultados is None: resultados = []
+        
+        i = 0
+        # Recorremos todas las claves del nodo actual
+        while i < len(nodo.claves):
+            # 1. Bajamos al hijo izquierdo antes de procesar la clave (Recorrido In-Orden)
+            if not nodo.hoja:
+                self.buscar_avanzado(filtro_nombre, min_s, max_s, nodo.hijos[i], resultados)
+            
+            # 2. Analizamos la clave actual
+            archivo = nodo.claves[i]
+            
+            # Verificamos Nombre (si pidieron filtro)
+            match_nombre = True
+            if filtro_nombre:
+                if filtro_nombre.lower() not in archivo["nombre"].lower():
+                    match_nombre = False
+            
+            # Verificamos Tamaño
+            match_tamano = min_s <= archivo["tamano"] <= max_s
+            
+            # Si cumple TODO, lo guardamos
+            if match_nombre and match_tamano:
+                resultados.append(archivo)
+                
+            i += 1
+            
+        # 3. Bajamos al último hijo (el de más a la derecha)
+        if not nodo.hoja:
+            self.buscar_avanzado(filtro_nombre, min_s, max_s, nodo.hijos[i], resultados)
+            
+        return resultados
     # División de nodo (La magia del Árbol B)
     def _dividir_hijo(self, x, i):
         t = self.t
